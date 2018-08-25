@@ -10,7 +10,8 @@ const mapStateToProps = (store, ownProps) => ({
   // provide pertinent state here
   allMarkers: store.map.allMarkers,
   selectedMarker: store.map.selectedMarker,
-  google: ownProps.google
+  google: ownProps.google,
+  currLocation: store.map.currLocation
 });
 
 const mapDispatchToProps = dispatch => ({
@@ -28,9 +29,12 @@ class GoogleMapsContainer extends React.Component {
 
   onMarkerClick(marker) {
     const id = marker.id; //broken---------------------------
+    // when we click on a marker on the map, the return object doesn't have
+    // the id value that I was trying to pass in
     this.props.dispatchOnMarkerClick(id);
   }
 
+  // unnecessary, can go straight to dispatch
   onMapClick (props) {
     this.props.dispatchOnMapClick();
   }
@@ -50,16 +54,12 @@ class GoogleMapsContainer extends React.Component {
     const markers = this.props.allMarkers.map((marker, i) => (
       <Marker key={marker.id} id={marker.id} onClick={this.onMarkerClick} position={marker.position}> </Marker>
     ));
-    const that = this;
-    const GoogleMapComponent = withScriptjs(withGoogleMap(props => 
-      
-      (
-      
-      
+
+    //this can eventually go in it's on file as a component
+    const GoogleMapComponent = withScriptjs(withGoogleMap(props => (
       <GoogleMap
-        defaultZoom={12}
+        defaultZoom={13}
         defaultCenter={{ lat: 33.9850, lng: -118.4695 }}
-        ref={(map => map && map.panTo(that.props.selectedMarker.position !== null ? that.props.selectedMarker.position : { lat: 33.9850, lng: -118.4695 }))}
       >
         {markers}
       </GoogleMap>
@@ -70,7 +70,7 @@ class GoogleMapsContainer extends React.Component {
         <GoogleMapComponent
           googleMapURL={`https://maps.googleapis.com/maps/api/js?key=${API}`}
           loadingElement={<div style={{ height: `100%` }} />}
-          containerElement={<div style={{ height: `400px` }} />}
+          containerElement={<div style={{ height: `100%` }} />}
           mapElement={<div style={{ height: `100%` }} />}
         />
       </div>

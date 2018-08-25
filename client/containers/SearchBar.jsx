@@ -5,7 +5,6 @@ import Input from '@material-ui/core/Input';
 import * as actions from '../actions/actions';
 import Button from '@material-ui/core/Button';
 import { withStyles } from '@material-ui/core/styles';
-//import child components
 
 const styles = theme => ({
   button: {
@@ -28,12 +27,14 @@ const styles = theme => ({
 
 const mapStateToProps = store => ({
   userInput: store.searches.userInput,
-  locations: store.searches.locations
+  locations: store.searches.locations,
+  currLocation: store.map.currLocation
 });
 
 const mapDispatchToProps = dispatch => ({
   addSearch: userInput => dispatch(actions.addSearch(userInput)),
-  addLocations: locations => dispatch(actions.addLocations(locations))
+  addLocations: locations => dispatch(actions.addLocations(locations)),
+  setCurrLocation: currLocation => dispatch(actions.setCurrLocation(currLocation))
 });
 
 class SearchBar extends Component {
@@ -47,36 +48,14 @@ class SearchBar extends Component {
   // make a post request to extract actual address from google maps through the backend
   handleSearch(event) {
     event.preventDefault();    
-    const input = this.props.userInput.toLowerCase();
-    const result= {};
-    // check first element of input to distinguish from address, city, or zipcode
-    // if first element of the userinput is not a number, it's a city
-    console.log('initial handle search', input);
-    if(isNaN(parseInt(input.charAt(0)))) {
-      // grab city
-      result.city = input;
-    }else {
-      // check the length of the userInput to distinguish zipcode or street address
-      // if > 5, street address
-      if(input.length > 5) {
-        // grab address
-        result.address = input;
-      }else {
-        // grab zipcode
-        result.zip = Number(input);
-      }
-    }
+    const input = this.props.userInput;
     
-    console.log('result inside client side', result);
-    
-    fetch('/searchAddress', 
-    {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify(result)
-    })
+    fetch(`/searchAddress/${input}`)
     .then(response => response.json())
-    .then(data => this.props.addLocations(data))
+    .then(data => {
+      this.props.addLocations(data.results);
+      this.props.currLocation(data.coords);
+    })
     .catch(err => {
       return err;
     })
@@ -84,9 +63,7 @@ class SearchBar extends Component {
   
   // set the state for the user's input from the search bar
   handleChange(event) {
-    console.log(`input ${event.target.value}`);
     this.props.addSearch(event.target.value);
-    console.log(`username hererereer ${this.props.userInput}`)
   }
 
   render() { 

@@ -21,7 +21,6 @@ const mapDispatchToProps = dispatch => ({
 class GoogleMapsContainer extends React.Component {
   constructor(props) {
     super(props);
-
     // binding this to event-handler functions
     this.onMarkerClick = this.onMarkerClick.bind(this);
     this.onMapClick = this.onMapClick.bind(this);
@@ -36,6 +35,8 @@ class GoogleMapsContainer extends React.Component {
     this.props.dispatchOnMapClick();
   }
 
+
+
   render() {
     const style = {
       width: '100%',
@@ -49,11 +50,16 @@ class GoogleMapsContainer extends React.Component {
     const markers = this.props.allMarkers.map((marker, i) => (
       <Marker key={marker.id} id={marker.id} onClick={this.onMarkerClick} position={marker.position}> </Marker>
     ));
-
-    const GoogleMapComponent = withScriptjs(withGoogleMap(props => (
+    const that = this;
+    const GoogleMapComponent = withScriptjs(withGoogleMap(props => 
+      
+      (
+      
+      
       <GoogleMap
         defaultZoom={12}
-        defaultCenter={{ lat: 34.05223, lng: -118.24368 }}
+        defaultCenter={{ lat: 33.9850, lng: -118.4695 }}
+        ref={(map => map && map.panTo(that.props.selectedMarker.position !== null ? that.props.selectedMarker.position : { lat: 33.9850, lng: -118.4695 }))}
       >
         {markers}
       </GoogleMap>
@@ -68,7 +74,7 @@ class GoogleMapsContainer extends React.Component {
           mapElement={<div style={{ height: `100%` }} />}
         />
       </div>
-    );
+    )
   }
 }
 
